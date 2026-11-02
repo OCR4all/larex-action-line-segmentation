@@ -26,7 +26,7 @@ cp template.env .env
 | `ACTION_DEBUG`                   | `false`     | Enable action worker logging.                                                                                                 |
 | `ACTION_MAX_CONCURRENT_RUNS`     | `1`         | Maximum number of worker runs admitted concurrently in one processor instance. Increase only after measuring host/GPU memory. |
 | `ACTION_PAGE_TIMEOUT`            | `20`        | Maximum processing time per page in seconds. If a page exceeds the timeout, the process is cancelled.                         |
-| `LINE_SEGMENTATION_THREADS`      | `0`         | Maximum number of regions processed in parallel.                                                                              |
+| `LINE_SEGMENTATION_THREADS`      | `1`         | Maximum number of regions processed in parallel.                                                                              |
 
 ### Docker/Podman Compose (Recommended)
 
