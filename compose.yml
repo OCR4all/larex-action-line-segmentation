@@ -1,0 +1,13 @@
+name: larex-action-line-segmentation
+
+services:
+  larex-action:
+    container_name: larex-action-line-segmentation
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${PORT:?No port defined}:9000"
+    restart: unless-stopped

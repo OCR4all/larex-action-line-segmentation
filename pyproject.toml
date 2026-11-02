@@ -1,0 +1,27 @@
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[project]
+name = "larex-action"
+version = "0.1.0"
+description = "Starter template for LAREX Action processors"
+readme = "README.md"
+authors = [
+    { name = "OCR4all", email = "ocr4all@uni-wuerzburg.de" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "atrtools",
+    "larex-action-sdk[fastapi]>=0.21.0",
+    "pydantic-settings>=2.15.0",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "types-lxml>=2026.2.16",
+]
+
+[tool.uv.sources]
+atrtools = { git = "https://github.com/jahtz/atrtools", branch = "larex-action/line-segmentation" }

@@ -1,0 +1,50 @@
+version: 1
+id: ...
+name: Line Segmentation
+description: Runs line segmentation for selected pages or regions.
+info: This action requires binary input images.
+kind: PROCESSING
+tags:
+  - segmentation
+targets:
+  - PAGE
+  - REGION
+
+endpoint:
+  url: http://larex.example.com/action/dispatch
+  healthUrl: http://larex.example.com/action/health
+  timeoutSeconds: 30
+  auth:
+    type: hmac
+    secretRef: ...
+
+# See https://docs.larex.kallimachos.de/actions/yaml-reference for further help
+access:
+  execute: CURATOR
+
+locking:
+  mode: PAGES
+
+inputs:
+  images:
+    level: required
+    imageTypes: 
+      - BINARY
+  xml:
+    level: required
+
+outputs:
+  xml:
+    enabled: true
+
+concurrency:
+  maxActiveRuns: 1
+  scope: PROJECT
+
+parameters:
+  Spread:
+    type: number
+    default: 0.0
+    min: 0
+    required: true
+    description: Distance in points (pt) from the foreground to project text line (or text region) labels into the background for polygonal contours; If zero, project half a scale/capheight.
