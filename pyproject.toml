@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "larex-action"
 version = "0.1.0"
-description = "Starter template for LAREX Action processors"
+description = "Line segmentation LAREX Actions processors"
 readme = "README.md"
 authors = [
     { name = "OCR4all", email = "ocr4all@uni-wuerzburg.de" }
@@ -13,7 +13,7 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "atrtools",
-    "larex-action-sdk[fastapi]>=0.21.0",
+    "larex-action-sdk[fastapi]>=0.23.0",
     "pydantic-settings>=2.15.0",
     "uvicorn>=0.54.0",
 ]

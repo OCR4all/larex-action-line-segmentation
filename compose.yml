@@ -1,8 +1,6 @@
-name: larex-action-line-segmentation
-
 services:
-  larex-action:
-    container_name: larex-action-line-segmentation
+  action:
+    container_name: larex-action-${NAME:?No name defined}
     build:
       context: ./
       dockerfile: Dockerfile

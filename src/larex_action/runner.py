@@ -133,55 +133,53 @@ async def _run(ctx: ActionContext) -> None:
                 raise_on_cancel=True
             )
             
-            async with ctx.step(f'[{i}/{total}] Processing page {page.name}'):
-                logger.debug(f'[{i}/{total}] Processing page {page.name}')
-                results = ctx.result_builder()
+            logger.debug(f'[{i}/{total}] Processing page {page.name}')
+            results = ctx.result_builder()
+            
+            try:
+                image = await ctx.download_bytes(page.images[0])
+                xml = await ctx.download_bytes(page.xml[0])
                 
-                try:
-                    image = await ctx.download_bytes(page.images[0])
-                    xml = await ctx.download_bytes(page.xml[0])
-                    
-                    if region_processing:
-                        regions = _get_selected_regions(action_input, page.id)
-                    else:
-                        regions = []
-                    
-                    connection.send(WorkerRequest(image, xml, regions))
-                    
-                    result = await _wait_for_worker(ctx, process, connection)
-                    if isinstance(result, WorkerFailure):
-                        message = f'[{i}/{total}] Action failed for {page.name}: {result.error}'
-                        status = 'FAILED'
-                        logger.error(message)
-                    elif isinstance(result, WorkerSuccess):
-                        results.add_xml_bytes(
-                            page_id=page.id,
-                            content=result.xml,
-                            file_name=f'{page.name or "page"}.xml'
-                        )
-                        
-                        message = f'[{i}/{total}] Action finished for {page.name}'
-                        status = 'SUCCEEDED'
-                        logger.debug(message)
-                        succeeded += 1
-                    else:
-                        raise RuntimeError(  # noqa: TRY004
-                            f'Worker returned an unknown result type: {type(result).__name__}'
-                        )
-                    
-                except asyncio.CancelledError:
-                    raise
-                except TimeoutError:
-                    message = f'[{i}/{total}] Action timed out for {page.name}'
+                if region_processing:
+                    regions = _get_selected_regions(action_input, page.id)
+                else:
+                    regions = []
+                
+                connection.send(WorkerRequest(image, xml, regions))
+                
+                result = await _wait_for_worker(ctx, process, connection)
+                if isinstance(result, WorkerFailure):
+                    message = f'[{i}/{total}] Action failed for {page.name}: {result.error}'
                     status = 'FAILED'
-                    logger.exception(message)
-                except Exception as exc:
-                    message = f'[{i}/{total}] Action failed for {page.name}: {type(exc).__name__} {exc}'
-                    status = 'FAILED'
-                    logger.exception(message)
+                    logger.error(message)
+                elif isinstance(result, WorkerSuccess):
+                    results.add_xml_bytes(
+                        page_id=page.id,
+                        content=result.xml,
+                        file_name=f'{page.name or "page"}.xml'
+                    )
+                    
+                    message = f'[{i}/{total}] Action finished for {page.name}'
+                    status = 'SUCCEEDED'
+                    logger.debug(message)
+                    succeeded += 1
+                else:
+                    raise RuntimeError(  # noqa: TRY004
+                        f'Worker returned an unknown result type: {type(result).__name__}'
+                    )
                 
-                await ctx.submit_page_results(page.id, results, message, page_status=status, reason=message)
-                
+            except asyncio.CancelledError:
+                raise
+            except TimeoutError:
+                message = f'[{i}/{total}] Action timed out for {page.name}'
+                status = 'FAILED'
+                logger.exception(message)
+            except Exception as exc:
+                message = f'[{i}/{total}] Action failed for {page.name}: {type(exc).__name__} {exc}'
+                status = 'FAILED'
+                logger.exception(message)
+            
+            await ctx.submit_page_results(page.id, results, message, page_status=status, reason=message)
             await ctx.heartbeat(progress_percent=_calculate_progress(i, total), raise_on_cancel=True)
         
         await _stop_worker(process, connection)

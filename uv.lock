@@ -183,7 +183,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "atrtools", git = "https://github.com/jahtz/atrtools?branch=larex-action%2Fline-segmentation" },
-    { name = "larex-action-sdk", extras = ["fastapi"], specifier = ">=0.21.0" },
+    { name = "larex-action-sdk", extras = ["fastapi"], specifier = ">=0.23.0" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
     { name = "uvicorn", specifier = ">=0.54.0" },
 ]
@@ -193,15 +193,15 @@ dev = [{ name = "types-lxml", specifier = ">=2026.2.16" }]
 
 [[package]]
 name = "larex-action-sdk"
-version = "0.21.0"
+version = "0.23.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/79/17f2371d2fdf4200ce3dcc79e8d5c262484064ecc83bf078ec66e1261b0f/larex_action_sdk-0.21.0.tar.gz", hash = "sha256:669771155c2ea9aecfd8d6aa30292837574c381b2529fe26d5e30fa4aae6103e", size = 68731, upload-time = "2026-10-28T08:11:49.627Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8c/39/8f6c70e242efbf5a776e83b5c2a9e58845dcf44896865d3f2c1222c850b5/larex_action_sdk-0.23.0.tar.gz", hash = "sha256:2a4f6c35607e5a147d85e02fed1ab4153c40bee77ee3a5be27fbe52343226f49", size = 69140, upload-time = "2026-11-03T12:30:09.411Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2b/ce/004b7b338972759c1601c03264836dd35ed6a4755689c5c99f26c3298637/larex_action_sdk-0.21.0-py3-none-any.whl", hash = "sha256:7e77158831ce28a8afa5935bf522ac62a2113e8ff34ac7dfb56b8d914de638e2", size = 35571, upload-time = "2026-10-28T08:11:48.468Z" },
+    { url = "https://files.pythonhosted.org/packages/96/b8/c3c2614abee9d825e3a83d1f717832cc653f3104d54429f677926526141a/larex_action_sdk-0.23.0-py3-none-any.whl", hash = "sha256:aa1febc0e895d9d83a10ba5ce4c9ed24f5bc31da8253859e6beda66a6e0448d1", size = 35450, upload-time = "2026-11-03T12:30:08.248Z" },
 ]
 
 [package.optional-dependencies]
