@@ -31,8 +31,6 @@ class WorkerStatus:
     message: str | None = None
 
 
-# TEMPLATE: accept passes parameters. Example:
-# def worker(connection: Connection, model: Path) -> None:
 def worker(connection: Connection, spread: float = 0.0) -> None:
     """
     Process-isolated action worker.
