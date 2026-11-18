@@ -3,7 +3,9 @@
 Compute baselines and polygons for existing TextRegions.
 
 > [!WARNING]
-> This actions requires binary images as input. Use [larex-action-sbbbin](https://github.com/OCR4all/larex-action-sbbbin) to generate them.
+> This actions requires binary images as input. 
+> Use [larex-action-sbb-binarization](https://github.com/OCR4all/larex-action-sbb-binarization) or 
+> [larex-action-ocropus-nlbin](https://github.com/OCR4all/larex-action-ocropus-nlbin) to generate them.
 
 ## Deployment
 
