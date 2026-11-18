@@ -26,7 +26,9 @@ cp template.env .env
 | `LAREX_SDK_TRANSPORT_DEBUG`      | `false`     | Set to `true` to log SDK pulls, heartbeats, downloads, uploads, retries, and failures locally.                                |
 | `ACTION_DEBUG`                   | `false`     | Enable action worker logging.                                                                                                 |
 | `ACTION_MAX_CONCURRENT_RUNS`     | `1`         | Maximum number of worker runs admitted concurrently in one processor instance. Increase only after measuring host/GPU memory. |
-| `ACTION_PAGE_TIMEOUT`            | `20`        | Maximum processing time per page in seconds. If a page exceeds the timeout, the process is cancelled.                         |
+| `ACTION_LOADING_TIMEOUT`         | `30`        | Maximum time in seconds a worker process may take to load (e.g. models). Applies to every worker start, including restarts after a page timeout. If exceeded, the whole action fails.                   |
+| `ACTION_PROCESSING_TIMEOUT`      | `30`      | Maximum processing time per page in seconds, not including worker loading. `None` means no limit. What happens when it is exceeded is set by `ACTION_TIMEOUT_MODE`.                                     |
+| `ACTION_TIMEOUT_MODE`            | `fail_page` | What happens when `ACTION_PROCESSING_TIMEOUT` is exceeded: `fail_page` fails only that page, restarts the worker and continues with the next pages; `fail_action` fails the whole action.               |
 | `LINE_SEGMENTATION_THREADS`      | `1`         | Maximum number of regions processed in parallel.                                                                              |
 
 ### Docker/Podman Compose (Recommended)

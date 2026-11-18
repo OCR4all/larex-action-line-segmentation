@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
-
 import logging
 from dataclasses import dataclass, field
 from multiprocessing.connection import Connection
+from typing import Literal
 
 from .config import env
 
@@ -13,41 +12,58 @@ logger.setLevel(logging.DEBUG if env.ACTION_DEBUG else logging.INFO)
 
 @dataclass
 class WorkerRequest:
-    """ Worker inputs """
+    """ Inputs for the worker process """
     image: bytes
     xml: bytes
     regions: list[str] = field(default_factory=list)
-    
+
 
 @dataclass
-class WorkerSuccess:
+class WorkerResponse:
     """ Worker outputs on success """
     xml: bytes
     
 
 @dataclass
-class WorkerFailure:
-    """ Worker output on failure """
-    error: str
+class WorkerStatus:
+    """ Status message from the worker """
+    type: Literal['loaded', 'error']
+    message: str | None = None
 
 
+# TEMPLATE: accept passes parameters. Example:
+# def worker(connection: Connection, model: Path) -> None:
 def worker(connection: Connection, spread: float = 0.0) -> None:
     """
     Process-isolated action worker.
-    
-    Request input with `request = connection.recv()`.
-    Send output with `connection.send(obj)`.
+ 
+    Protocol:
+    1. Send exactly one `WorkerStatus` after startup: 'loaded', or 'error' followed by exit if loading failed.
+    2. For every request (`request = connection.recv()`), send exactly one `WorkerResponse`
+       or `WorkerStatus('error', ...)` (`connection.send(obj)`).
+    3. Exit when `None` is received or the parent closes the pipe.
     """
     logger.debug('Initialize worker')
     
-    import cv2
-    import numpy as np
-    from atrtools.line_segmentation import LineSegmentation
-    from lxml import etree
-    from pypxml import PageXML
-    
-    segmenter = LineSegmentation(spread, threads=env.LINE_SEGMENTATION_THREADS)
-    parser = etree.XMLParser(remove_blank_text=True, encoding='utf-8')
+    try:
+        import cv2
+        import numpy as np
+        from atrtools.line_segmentation import LineSegmentation
+        from lxml import etree
+        from pypxml import PageXML
+        
+        segmenter = LineSegmentation(spread, threads=env.LINE_SEGMENTATION_THREADS)
+        parser = etree.XMLParser(remove_blank_text=True, encoding='utf-8')
+        
+        connection.send(WorkerStatus('loaded'))
+    except Exception as exc:
+        logger.exception('Failed to load worker')
+        try:
+            connection.send(WorkerStatus('error', f'{type(exc).__name__} {exc}'))
+        except (BrokenPipeError, EOFError, OSError):
+            logger.warning('Could not send load failure to parent')
+        connection.close()
+        return
     
     while True:
         try:
@@ -61,10 +77,13 @@ def worker(connection: Connection, spread: float = 0.0) -> None:
         if not isinstance(request, WorkerRequest):
             logger.error(f'Received unexpected request: {type(request).__name__}')
             continue
-        
+
         try:
             xml = PageXML._from_etree(etree.fromstring(request.xml, parser))
-            image = cv2.imdecode(np.frombuffer(request.image, np.uint8), cv2.IMREAD_GRAYSCALE)
+            image = cv2.imdecode(
+                np.frombuffer(request.image, np.uint8), 
+                cv2.IMREAD_GRAYSCALE
+            )
             if image is None:
                 raise ValueError('Could not decode image')
             if len(np.unique(image)) > 2:
@@ -75,15 +94,18 @@ def worker(connection: Connection, spread: float = 0.0) -> None:
             else:
                 result = segmenter.process(image, xml)
 
-            connection.send(WorkerSuccess(etree.tostring(result._to_etree(), pretty_print=True)))
-            
+            connection.send(WorkerResponse(etree.tostring(
+                result._to_etree(), 
+                pretty_print=True
+            )))
+
         except Exception as exc:
             logger.exception('Failed to process element')
             try:
-                connection.send(WorkerFailure(f'{type(exc).__name__}: {exc}'))
+                connection.send(WorkerStatus('error', f'{type(exc).__name__} {exc}'))
             except (BrokenPipeError, EOFError, OSError):
                 logger.warning('Could not send worker failure to parent')
                 break
-    
+
     connection.close()
     logger.info('Worker stopped successfully')

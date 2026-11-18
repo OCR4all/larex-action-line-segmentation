@@ -13,8 +13,8 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "atrtools",
-    "larex-action-sdk[fastapi]>=0.23.0",
-    "pydantic-settings>=2.15.0",
+    "larex-action-sdk[fastapi]>=0.26.0",
+    "pydantic-settings>=2.16.0",
     "uvicorn>=0.54.0",
 ]
 
